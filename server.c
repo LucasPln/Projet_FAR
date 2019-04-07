@@ -13,7 +13,7 @@
 int main(int argc, char const *argv[]){
 
 
-
+	int res;
 	int dSocket = socket(PF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in ad;
 	ad.sin_family = AF_INET;
@@ -29,38 +29,92 @@ int main(int argc, char const *argv[]){
 	while(1){
 		int dSocketClient1 = accept(dSocket, (struct sockaddr*)&aC, &lg);
 
-		if(dSocketClient < 0){
+		if(dSocketClient1 < 0){
 			perror("Problème lors de la création du socket client1");
 			return 1;
 		}
 
-		/*
-		Envoie message client1
-		*/
+		res = send(dSocketClient1, 1, sizeof(int),0);
+
+		if(res < 0){
+			perror("Problème lors de l'envoie du numéro du client1");
+			return 1;
+		} else if(res == 0){
+			perror("Socket fermé");
+			return 1;
+		}
 
 		int dSocketClient2 = accept(dSocket, (struct sockaddr*)&aC, &lg);
 
-		if(dSocketClient < 0){
+		if(dSocketClient2 < 0){
 			perror("Problème lors de la création du socket client2");
 			return 1;
 		}
 
+		res = send(dSocketClient2, 2, sizeof(int),0);
+
+		if(res < 0){
+			perror("Problème lors de l'envoie du numéro du client2");
+			return 1;
+		} else if(res == 0){
+			perror("Socket fermé");
+			return 1;
+		}
+
 		/*
-		Envoie message client2
 		Envoie confirmation au client1
 		*/
 
 		while(1){
-		//Reception message client1
-		
-		//Envoie message client1 au client2
+			char msgClient1[200];
+			char msgClient2[200];
 
-		//Reception message client2
+			res = recv(dSocketClient1, msgClient1, sizeof(msgClient1),0);
 
-		//Envoie message client2 au client1
+			if(res < 0){
+				perror("Problème lors de la réception du message du client1");
+				return 1;
+			} else if(res == 0){
+				perror("Socket fermé");
+				return 1;
+			}
+			
+			res = send(dSocketClient2, &msgClient1, sizeof(msgClient1),0);
+
+			if(res < 0){
+				perror("Problème lors de l'envoie du message du client1 au client2");
+				return 1;
+			} else if(res == 0){
+				perror("Socket fermé");
+				return 1;
+			}
+
+			res = recv(dSocketClient2, msgClient2, sizeof(msgClient2),0);
+
+			if(res < 0){
+				perror("Problème lors de la réception du message du client2");
+				return 1;
+			} else if(res == 0){
+				perror("Socket fermé");
+				return 1;
+			}
+
+			res = send(dSocketClient1, &msgClient2, sizeof(msgClient2),0);
+
+			if(res < 0){
+				perror("Problème lors de l'envoie du message du client2 au client1");
+				return 1;
+			} else if(res == 0){
+				perror("Socket fermé");
+				return 1;
+			}
 		}
-	//fermer sockets client1 & 2
+
+		close(dSocketClient1);
+		close(dSocketClient2);
 
 	}
-	//fermer socket server
+	close(dSocket);
+
+	return 0;
 }
