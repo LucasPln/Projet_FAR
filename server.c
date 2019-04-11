@@ -88,6 +88,11 @@ int main(int argc, char const *argv[]){
 			
 			res = send(dSocketClient2, &msgClient1, sizeof(msgClient1),0);
 
+			*strchr(msgClient1, '\n') = '\0';
+			if(strcmp(msgClient1, "fin")){
+				break;
+			}
+
 			if(res < 0){
 				perror("Problème lors de l'envoie du message du client1 au client2");
 				return 1;
@@ -107,6 +112,11 @@ int main(int argc, char const *argv[]){
 			}
 
 			res = send(dSocketClient1, &msgClient2, sizeof(msgClient2),0);
+			
+			*strchr(msgClient2, '\n') = '\0';
+			if(strcmp(msgClient2, "fin")){
+				break;
+			}
 
 			if(res < 0){
 				perror("Problème lors de l'envoie du message du client2 au client1");
