@@ -28,59 +28,58 @@ int main(int argc, char ** argv){
 	Reception message server 
 	*/
 	int numClient;
-	res = recv(dSock, numClient, sizeof(numCLient), 0);
+	res = recv(dSock, numClient, sizeof(numClient), 0);
 	if (res<0){
 		perror ("le message pour dire que le client s'est connecte n'a pas ete recu");
 		return 1;
 	}
 
-	if(numCLient == 1){
-	//Attendre 2ème client
-	char msgAttente;
-	res = recv(dSock, msgAttente, sizeof(msgAttente), 0);
-	if (res<0){
-		perror("le message pour dire que le deuxieme client s'est connecte n'a pas ete recu");
-		return 1;
-	}
-	
-	//Envoi du message à 2 
-	char mot [NMAX]; 
-	printf("Que voulez vous envoyer ?\n");
-	fgets(mot,NMAX,stdin,0); 
-	res = send(dSock,mot,NMAX,0);
-	if (res<0){
-		perror("Message non envoyé");
-		return 1;
-	}
-	printf("%d\n",res);
-	return 0; 
-	//reception du message de 2
-	char msg2;
-	res = recv(dSock, msg2, sizeof(msg2), 0);
-	if (res<0){
-		perror ("le message pour dire que le client s'est connecte n'a pas ete recu");
-		return 1;
+	if(numClient == 1){
+		//Attendre 2ème client
+		char msgAttente;
+		res = recv(dSock, msgAttente, sizeof(msgAttente), 0);
+		if (res<0){
+			perror("le message pour dire que le deuxieme client s'est connecte n'a pas ete recu");
+			return 1;
+		}
+		
+		//Envoi du message à 2 
+		char mot [NMAX]; 
+		printf("Que voulez vous envoyer ?\n");
+		fgets(mot,NMAX,stdin); 
+		res = send(dSock,mot,NMAX,0);
+		if (res<0){
+			perror("Message non envoyé");
+			return 1;
+		}
+		//reception du message de 2
+		char msg2;
+		res = recv(dSock, msg2, sizeof(msg2), 0);
+		if (res<0){
+			perror ("le message pour dire que le client s'est connecte n'a pas ete recu");
+			return 1;
+		}
 
 	} else if (numClient == 2){
+		//Reception du message de 1 
+		char msg1; 
+		res = recv(dSock, msg1, sizeof(msg1), 0);
 
-	//Reception du message de 1 
-	char msg1; 
-	res = recv(dSock, msg1, sizeof(msg1), 0);
-	if (res<0){
-		perror ("le message pour dire que le client 2 a recu un message du client 1 n'a pas ete recu");
-		return 1;
+		if (res<0){
+			perror ("le message pour dire que le client 2 a recu un message du client 1 n'a pas ete recu");
+			return 1;
+		}
 
-	//Envoie du message à 1
-	char mot [NMAX]; 
-	printf("Que voulez vous envoyer ?\n");
-	fgets(mot,NMAX,stdin,0); 
-	res = send(dSock,mot,NMAX,0);
-	if (res<0){
-		perror("Message non envoyé");
-		return 1;
+		//Envoie du message à 1
+		char mot [NMAX]; 
+		printf("Que voulez vous envoyer ?\n");
+		fgets(mot,NMAX,stdin); 
+		res = send(dSock,mot,NMAX,0);
+		if (res<0){
+			perror("Message non envoyé");
+			return 1;
+		}
 	}
-	printf("%d\n",res);
-	return 0; 
-	}
-	close(dSock)
+	close(dSock);
+	return 0;
 }
