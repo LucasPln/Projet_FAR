@@ -61,9 +61,16 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
-		/*
-		Envoie confirmation au client1
-		*/
+		char messageConfirmation[200] = "Le client 2 est connecté, vous commencer la communication";
+		res = send(dSocketClient1, 2, sizeof(messageConfirmation),0);
+
+		if(res < 0){
+			perror("Problème lors de l'envoie de la confirmation au client1");
+			return 1;
+		} else if(res == 0){
+			perror("Socket fermé");
+			return 1;
+		}
 
 		while(1){
 			char msgClient1[200];
@@ -80,6 +87,11 @@ int main(int argc, char const *argv[]){
 			}
 			
 			res = send(dSocketClient2, &msgClient1, sizeof(msgClient1),0);
+
+			*strchr(msgClient1, '\n') = '\0';
+			if(strcmp(msgClient1, "fin")){
+				break;
+			}
 
 			if(res < 0){
 				perror("Problème lors de l'envoie du message du client1 au client2");
@@ -100,6 +112,11 @@ int main(int argc, char const *argv[]){
 			}
 
 			res = send(dSocketClient1, &msgClient2, sizeof(msgClient2),0);
+			
+			*strchr(msgClient2, '\n') = '\0';
+			if(strcmp(msgClient2, "fin")){
+				break;
+			}
 
 			if(res < 0){
 				perror("Problème lors de l'envoie du message du client2 au client1");
