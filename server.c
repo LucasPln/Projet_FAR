@@ -8,6 +8,7 @@
 #include <string.h>
 #include <signal.h>
 #include <netdb.h>
+#define NMAX 200
 
 
 int main(int argc, char const *argv[]){
@@ -63,8 +64,8 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
-		char messageConfirmation[200] = "Le client 2 est connecté, vous commencer la communication";
-		res = send(dSocketClient1, 2, sizeof(messageConfirmation),0);
+		char messageConfirmation[NMAX] = "Le client 2 est connecté, vous pouvez commencer la communication";
+		res = send(dSocketClient1, &messageConfirmation, sizeof(messageConfirmation),0);
 
 		if(res < 0){
 			perror("Problème lors de l'envoie de la confirmation au client1");
@@ -75,8 +76,8 @@ int main(int argc, char const *argv[]){
 		}
 
 		while(1){
-			char msgClient1[200];
-			char msgClient2[200];
+			char msgClient1[NMAX];
+			char msgClient2[NMAX];
 
 			res = recv(dSocketClient1, msgClient1, sizeof(msgClient1),0);
 
@@ -87,10 +88,13 @@ int main(int argc, char const *argv[]){
 				perror("Socket fermé");
 				return 1;
 			}
-			
-			res = send(dSocketClient2, &msgClient1, sizeof(msgClient1),0);
 
 			*strchr(msgClient1, '\n') = '\0';
+
+			printf("Le client1 dit : %s\n", msgClient1);
+			
+			res = send(dSocketClient2, &msgClient1, sizeof(msgClient1),0);
+			
 			if(strcmp(msgClient1, "fin")){
 				break;
 			}
@@ -112,10 +116,13 @@ int main(int argc, char const *argv[]){
 				perror("Socket fermé");
 				return 1;
 			}
-
-			res = send(dSocketClient1, &msgClient2, sizeof(msgClient2),0);
 			
 			*strchr(msgClient2, '\n') = '\0';
+
+			printf("Le client2 dit : %s\n", msgClient2);
+
+			res = send(dSocketClient1, &msgClient2, sizeof(msgClient2),0);
+
 			if(strcmp(msgClient2, "fin")){
 				break;
 			}
