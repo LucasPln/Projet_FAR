@@ -34,7 +34,8 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
-		res = send(dSocketClient1, 1, sizeof(int),0);
+		int numClient1 = 1;
+		res = send(dSocketClient1, &numClient1, sizeof(int),0);
 
 		if(res < 0){
 			perror("Problème lors de l'envoie du numéro du client1");
@@ -51,7 +52,8 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
-		res = send(dSocketClient2, 2, sizeof(int),0);
+		int numClient2 = 2;
+		res = send(dSocketClient2, &numClient2, sizeof(int),0);
 
 		if(res < 0){
 			perror("Problème lors de l'envoie du numéro du client2");
