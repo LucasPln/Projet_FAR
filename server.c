@@ -93,8 +93,6 @@ int main(int argc, char const *argv[]){
 				return 1;
 			}
 
-			*strchr(msgClient1, '\n') = '\0';
-
 			printf("Le client1 dit : %s\n", msgClient1);
 			
 			res = send(dSocketClient2, &msgClient1, strlen(msgClient1),0);
@@ -113,7 +111,7 @@ int main(int argc, char const *argv[]){
 				return 1;
 			}
 
-			res = recv(dSocketClient2, &msgClient2, sizeof(msgClient2),0);
+			res = recv(dSocketClient2, &msgClient2, NMAX,0);
 
 			if(res < 0){
 				perror("Problème lors de la réception du message du client2");
@@ -122,12 +120,10 @@ int main(int argc, char const *argv[]){
 				perror("Socket fermé");
 				return 1;
 			}
-			
-			*strchr(msgClient2, '\n') = '\0';
 
 			printf("Le client2 dit : %s\n", msgClient2);
 
-			res = send(dSocketClient1, &msgClient2, sizeof(msgClient2),0);
+			res = send(dSocketClient1, &msgClient2, strlen(msgClient2),0);
 
 			if(strcmp(msgClient2, "fin") == 0){
 				close(dSocketClient1);

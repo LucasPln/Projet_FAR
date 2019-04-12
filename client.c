@@ -54,11 +54,18 @@ int main(int argc, char ** argv){
 			//Envoi du message à 2 
 			char mot[NMAX]; 
 			printf("Que voulez vous envoyer ?\n");
-			fgets(mot,NMAX,stdin); 
+			fgets(mot,NMAX,stdin);
+			*strchr(mot, '\n') = '\0';
 			res = send(dSock,&mot,strlen(mot),0);
 			if (res<0){
 				perror("Message non envoyé");
 				return 1;
+			}
+
+			if(strcmp(mot, "fin") == 0){
+				printf("Communication fermée\n");
+				close(dSock);
+				return 0;
 			}
 
 			//reception du message de 2
@@ -70,6 +77,12 @@ int main(int argc, char ** argv){
 			}
 
 			printf("Le client2 dit : %s\n", msg2);
+
+			if(strcmp(msg2, "fin") == 0){
+				printf("Communication fermée\n");
+				close(dSock);
+				return 0;
+			}
 		}
 		close(dSock);
 		
@@ -88,14 +101,27 @@ int main(int argc, char ** argv){
 
 			printf("Le client1 dit : %s\n", msg1);
 
+			if(strcmp(msg1, "fin") == 0){
+				printf("Communication fermée\n");
+				close(dSock);
+				return 0;
+			}
+
 			//Envoie du message à 1
 			char mot[NMAX]; 
 			printf("Que voulez vous envoyer ?\n");
-			fgets(mot,NMAX,stdin); 
+			fgets(mot,NMAX,stdin);
+			*strchr(mot, '\n') = '\0';
 			res = send(dSock,&mot,strlen(mot),0);
 			if (res<0){
 				perror("Message non envoyé");
 				return 1;
+			}
+
+			if(strcmp(mot, "fin") == 0){
+				printf("Communication fermée\n");
+				close(dSock);
+				return 0;
 			}
 		}
 		close(dSock);
