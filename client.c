@@ -1,12 +1,16 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/socket.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <string.h>
 #define NMAX 200
 
 int main(int argc, char ** argv){
 
 	char* addr_ip = argv[1];
-	//short port = argv[2];
+	
 
 	int dSock = socket(PF_INET, SOCK_STREAM, 0);
 	if (dSock < 0){
@@ -38,7 +42,7 @@ int main(int argc, char ** argv){
 		printf("%s\n", "Bonjour client1. En attente du deuxième client...");
 		//Attendre 2ème client
 		char msgAttente[NMAX];
-		res = recv(dSock, msgAttente, sizeof(msgAttente), 0);
+		res = recv(dSock, &msgAttente, NMAX, 0);
 		if (res<0){
 			perror("le message pour dire que le deuxieme client s'est connecte n'a pas ete recu");
 			return 1;
@@ -51,7 +55,7 @@ int main(int argc, char ** argv){
 			char mot[NMAX]; 
 			printf("Que voulez vous envoyer ?\n");
 			fgets(mot,NMAX,stdin); 
-			res = send(dSock,&mot,NMAX,0);
+			res = send(dSock,&mot,strlen(mot),0);
 			if (res<0){
 				perror("Message non envoyé");
 				return 1;
@@ -59,7 +63,7 @@ int main(int argc, char ** argv){
 
 			//reception du message de 2
 			char msg2[NMAX];
-			res = recv(dSock, msg2, sizeof(msg2), 0);
+			res = recv(dSock, &msg2, NMAX, 0);
 			if (res<0){
 				perror ("le message pour dire que le client s'est connecte n'a pas ete recu");
 				return 1;
@@ -75,7 +79,7 @@ int main(int argc, char ** argv){
 		while(1){
 			//Reception du message de 1 
 			char msg1[NMAX]; 
-			res = recv(dSock, msg1, sizeof(msg1), 0);
+			res = recv(dSock, &msg1, NMAX, 0);
 
 			if (res<0){
 				perror ("le message pour dire que le client 2 a recu un message du client 1 n'a pas ete recu");
@@ -88,7 +92,7 @@ int main(int argc, char ** argv){
 			char mot[NMAX]; 
 			printf("Que voulez vous envoyer ?\n");
 			fgets(mot,NMAX,stdin); 
-			res = send(dSock,&mot,NMAX,0);
+			res = send(dSock,&mot,strlen(mot),0);
 			if (res<0){
 				perror("Message non envoyé");
 				return 1;

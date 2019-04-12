@@ -15,6 +15,7 @@ int main(int argc, char const *argv[]){
 
 
 	int res;
+
 	int dSocket = socket(PF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in ad;
 	ad.sin_family = AF_INET;
@@ -23,12 +24,15 @@ int main(int argc, char const *argv[]){
 
 	bind(dSocket, (struct sockaddr*)&ad, sizeof(ad));
 	listen(dSocket, 7);
-	struct sockaddr_in aC;
 
-	socklen_t lg = sizeof(struct sockaddr_in);
+	struct sockaddr_in addrClient1;
+	struct sockaddr_in addrClient2;
+
+	socklen_t lg1 = sizeof(struct sockaddr_in);
+	socklen_t lg2 = sizeof(struct sockaddr_in);
 
 	while(1){
-		int dSocketClient1 = accept(dSocket, (struct sockaddr*)&aC, &lg);
+		int dSocketClient1 = accept(dSocket, (struct sockaddr*)&addrClient1, &lg1);
 
 		if(dSocketClient1 < 0){
 			perror("Problème lors de la création du socket client1");
@@ -46,7 +50,7 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
-		int dSocketClient2 = accept(dSocket, (struct sockaddr*)&aC, &lg);
+		int dSocketClient2 = accept(dSocket, (struct sockaddr*)&addrClient2, &lg2);
 
 		if(dSocketClient2 < 0){
 			perror("Problème lors de la création du socket client2");
@@ -64,8 +68,8 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
-		char messageConfirmation[NMAX] = "Le client 2 est connecté, vous pouvez commencer la communication";
-		res = send(dSocketClient1, &messageConfirmation, sizeof(messageConfirmation),0);
+		char messageConfirmation[NMAX] = "Le client 2 est connecté, vous pouvez commencer la communication\0";
+		res = send(dSocketClient1, &messageConfirmation, strlen(messageConfirmation),0);
 
 		if(res < 0){
 			perror("Problème lors de l'envoie de la confirmation au client1");
@@ -79,7 +83,7 @@ int main(int argc, char const *argv[]){
 			char msgClient1[NMAX];
 			char msgClient2[NMAX];
 
-			res = recv(dSocketClient1, msgClient1, sizeof(msgClient1),0);
+			res = recv(dSocketClient1, &msgClient1, NMAX,0);
 
 			if(res < 0){
 				perror("Problème lors de la réception du message du client1");
@@ -93,9 +97,11 @@ int main(int argc, char const *argv[]){
 
 			printf("Le client1 dit : %s\n", msgClient1);
 			
-			res = send(dSocketClient2, &msgClient1, sizeof(msgClient1),0);
+			res = send(dSocketClient2, &msgClient1, strlen(msgClient1),0);
 			
-			if(strcmp(msgClient1, "fin")){
+			if(strcmp(msgClient1, "fin") == 0){
+				close(dSocketClient1);
+				close(dSocketClient2);
 				break;
 			}
 
@@ -107,7 +113,7 @@ int main(int argc, char const *argv[]){
 				return 1;
 			}
 
-			res = recv(dSocketClient2, msgClient2, sizeof(msgClient2),0);
+			res = recv(dSocketClient2, &msgClient2, sizeof(msgClient2),0);
 
 			if(res < 0){
 				perror("Problème lors de la réception du message du client2");
@@ -123,7 +129,9 @@ int main(int argc, char const *argv[]){
 
 			res = send(dSocketClient1, &msgClient2, sizeof(msgClient2),0);
 
-			if(strcmp(msgClient2, "fin")){
+			if(strcmp(msgClient2, "fin") == 0){
+				close(dSocketClient1);
+				close(dSocketClient2);
 				break;
 			}
 
@@ -136,8 +144,7 @@ int main(int argc, char const *argv[]){
 			}
 		}
 
-		close(dSocketClient1);
-		close(dSocketClient2);
+		
 
 	}
 	close(dSocket);
