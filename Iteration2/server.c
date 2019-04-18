@@ -8,7 +8,19 @@
 #include <string.h>
 #include <signal.h>
 #include <netdb.h>
+#include <pthread.h>
 #define NMAX 200
+
+struct thread_args{
+	int socketServer;
+	int socketClient1;
+	int socketClient2;
+};
+
+void *communication(struct thread_args *args){
+	printf("%d\n", args->socketServer);
+
+}
 
 
 int main(int argc, char const *argv[]){
@@ -79,6 +91,7 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
+		/*
 		while(1){
 			char msgClient1[NMAX];
 			char msgClient2[NMAX];
@@ -139,8 +152,28 @@ int main(int argc, char const *argv[]){
 				return 1;
 			}
 		}
+		*/
 
-		
+		pthread_t threadClient1;
+		struct thread_args argsClient1;
+		argsClient1.socketServer = dSocket;
+		argsClient1.socketClient1 = dSocketClient1;
+		argsClient1.socketClient2 = dSocketClient2;
+		pthread_create(&threadClient1, 0, communication, &argsClient1);
+
+		pthread_t threadClient2;
+		struct thread_args argsClient2;
+		argsClient2.socketServer = dSocket;
+		argsClient2.socketClient1 = dSocketClient2;
+		argsClient2.socketClient2 = dSocketClient1;
+		pthread_create(&threadClient2, 0, communication, &argsClient2);
+
+		pthread_join(threadClient1,0);
+		pthread_join(threadClient2,0);
+
+		close(dSocketClient1);
+		close(dSocketClient2);
+
 
 	}
 	close(dSocket);
