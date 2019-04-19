@@ -18,8 +18,39 @@ struct thread_args{
 };
 
 void *communication(struct thread_args *args){
-	printf("%d\n", args->socketServer);
+	while(1){
+		int res;
+		char msgClient1[NMAX];
+		char msgClient2[NMAX];
 
+		res = recv(args->socketClient1, &msgClient1, NMAX,0);
+
+		if(res < 0){
+			perror("Problème lors de la réception du message du client1");
+			exit(1);
+		} else if(res == 0){
+			perror("Socket fermé");
+			exit(1);
+		}
+
+		printf("Un client dit : %s\n", msgClient1);
+
+		res = send(args->socketClient2, &msgClient1, strlen(msgClient1),0);
+				
+		if(strcmp(msgClient1, "fin") == 0){
+			close(args->socketClient1);
+			close(args->socketClient2);
+			break;
+		}
+
+		if(res < 0){
+			perror("Problème lors de l'envoie du message du client1 au client2");
+			exit(1);
+		} else if(res == 0){
+			perror("Socket fermé");
+			exit(1);
+		}
+	}
 }
 
 
@@ -91,68 +122,6 @@ int main(int argc, char const *argv[]){
 			return 1;
 		}
 
-		/*
-		while(1){
-			char msgClient1[NMAX];
-			char msgClient2[NMAX];
-
-			res = recv(dSocketClient1, &msgClient1, NMAX,0);
-
-			if(res < 0){
-				perror("Problème lors de la réception du message du client1");
-				return 1;
-			} else if(res == 0){
-				perror("Socket fermé");
-				return 1;
-			}
-
-			printf("Le client1 dit : %s\n", msgClient1);
-			
-			res = send(dSocketClient2, &msgClient1, strlen(msgClient1),0);
-			
-			if(strcmp(msgClient1, "fin") == 0){
-				close(dSocketClient1);
-				close(dSocketClient2);
-				break;
-			}
-
-			if(res < 0){
-				perror("Problème lors de l'envoie du message du client1 au client2");
-				return 1;
-			} else if(res == 0){
-				perror("Socket fermé");
-				return 1;
-			}
-
-			res = recv(dSocketClient2, &msgClient2, NMAX,0);
-
-			if(res < 0){
-				perror("Problème lors de la réception du message du client2");
-				return 1;
-			} else if(res == 0){
-				perror("Socket fermé");
-				return 1;
-			}
-
-			printf("Le client2 dit : %s\n", msgClient2);
-
-			res = send(dSocketClient1, &msgClient2, strlen(msgClient2),0);
-
-			if(strcmp(msgClient2, "fin") == 0){
-				close(dSocketClient1);
-				close(dSocketClient2);
-				break;
-			}
-
-			if(res < 0){
-				perror("Problème lors de l'envoie du message du client2 au client1");
-				return 1;
-			} else if(res == 0){
-				perror("Socket fermé");
-				return 1;
-			}
-		}
-		*/
 
 		pthread_t threadClient1;
 		struct thread_args argsClient1;
@@ -170,9 +139,6 @@ int main(int argc, char const *argv[]){
 
 		pthread_join(threadClient1,0);
 		pthread_join(threadClient2,0);
-
-		close(dSocketClient1);
-		close(dSocketClient2);
 
 
 	}
