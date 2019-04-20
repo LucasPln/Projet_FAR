@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <pthread.h>
 #define NMAX 200
 
 int main(int argc, char ** argv){
@@ -28,9 +29,62 @@ int main(int argc, char ** argv){
 		perror("Probleme de connection au serveur");
 		return 1;
 	}
-	/*
-	Reception message server 
-	*/
+
+	void *EnvoiMessage(int dSock){
+		char mot[NMAX]; 
+		while(1){
+			printf("Que voulez vous envoyer ?\n");
+			fgets(mot,NMAX,stdin);
+			*strchr(mot, '\n') = '\0';
+			res = send(dSock,&mot,strlen(mot),0);
+			if (res<0){
+				perror("Message non envoyé");
+				exit(0);
+			}
+			if(strcmp(mot, "fin") == 0){
+				printf("Communication fermée\n");
+				close(dSock);
+				exit(0);
+			}
+		close(dSock)
+		}
+	}
+
+	void *RecoitMessage(int dSock){
+		char msg[NMAX];
+		while(1){ 
+			res = recv(dSock, &msg, NMAX, 0);
+
+			if (res<0){
+				perror ("le message pour dire que le client n'a pas recu le message de l'autre n'a pas ete recu");
+				exit(0);
+			}
+
+			printf("Le client dit : %s\n", msg);
+			
+			if(strcmp(msg, "fin") == 0){
+				printf("Communication fermée\n");
+				close(dSock);
+				exit(0);
+			}
+		close(dSock)
+		}
+	}
+
+	pthread_t Envoie;
+		pthread_create(&Envoie, 0, EnvoiMessage, &dSock);
+
+	pthread_t Recoit;
+		pthread_create(&Recoit, 0, RecoitMessage, &dSock);
+
+	
+	pthread_join(dSock,0);
+	
+	
+	return 0;
+}
+ 	/*
+	
 	int numClient;
 	res = recv(dSock, &numClient, sizeof(numClient), 0);
 	if (res<0){
@@ -125,8 +179,4 @@ int main(int argc, char ** argv){
 			}
 		}
 		close(dSock);
-		
-	}
-	
-	return 0;
-}
+		*/
