@@ -8,6 +8,45 @@
 #include <pthread.h>
 #define NMAX 200
 
+
+void *EnvoiMessage(int dSock){
+	char mot[NMAX]; 
+	while(1){
+		printf("Que voulez vous envoyer ?\n");
+		fgets(mot,NMAX,stdin);
+		*strchr(mot, '\n') = '\0';
+		res = send(dSock,&mot,strlen(mot),0);
+		if (res<0){
+			perror("Message non envoyé");
+			exit(0);
+		}
+		if(strcmp(mot, "fin") == 0){
+			printf("Communication fermée\n");
+			close(dSock);
+			exit(0);
+		}
+	close(dSock)
+	}
+}
+
+void *RecoitMessage(int dSock){
+	char msg[NMAX];
+	while(1){ 
+		res = recv(dSock, &msg, NMAX, 0);
+		if (res<0){
+			perror ("le message pour dire que le client n'a pas recu le message de l'autre n'a pas ete recu");
+			exit(0);
+		}
+		printf("Le client dit : %s\n", msg);
+		if(strcmp(msg, "fin") == 0){
+			printf("Communication fermée\n");
+			close(dSock);
+			exit(0);
+		}
+	close(dSock)
+	}
+}
+
 int main(int argc, char ** argv){
 
 	char* addr_ip = argv[1];
@@ -30,47 +69,7 @@ int main(int argc, char ** argv){
 		return 1;
 	}
 
-	void *EnvoiMessage(int dSock){
-		char mot[NMAX]; 
-		while(1){
-			printf("Que voulez vous envoyer ?\n");
-			fgets(mot,NMAX,stdin);
-			*strchr(mot, '\n') = '\0';
-			res = send(dSock,&mot,strlen(mot),0);
-			if (res<0){
-				perror("Message non envoyé");
-				exit(0);
-			}
-			if(strcmp(mot, "fin") == 0){
-				printf("Communication fermée\n");
-				close(dSock);
-				exit(0);
-			}
-		close(dSock)
-		}
-	}
-
-	void *RecoitMessage(int dSock){
-		char msg[NMAX];
-		while(1){ 
-			res = recv(dSock, &msg, NMAX, 0);
-
-			if (res<0){
-				perror ("le message pour dire que le client n'a pas recu le message de l'autre n'a pas ete recu");
-				exit(0);
-			}
-
-			printf("Le client dit : %s\n", msg);
-			
-			if(strcmp(msg, "fin") == 0){
-				printf("Communication fermée\n");
-				close(dSock);
-				exit(0);
-			}
-		close(dSock)
-		}
-	}
-
+	
 	pthread_t Envoie;
 		pthread_create(&Envoie, 0, EnvoiMessage, &dSock);
 
@@ -78,105 +77,8 @@ int main(int argc, char ** argv){
 		pthread_create(&Recoit, 0, RecoitMessage, &dSock);
 
 	
-	pthread_join(dSock,0);
-	
+	pthread_join(Envoie,0);
+	pthread_join(Recoit,0);
 	
 	return 0;
 }
- 	/*
-	
-	int numClient;
-	res = recv(dSock, &numClient, sizeof(numClient), 0);
-	if (res<0){
-		perror ("le message pour dire que le client s'est connecte n'a pas ete recu");
-		return 1;
-	}
-
-	if(numClient == 1){
-		printf("%s\n", "Bonjour client1. En attente du deuxième client...");
-		//Attendre 2ème client
-		char msgAttente[NMAX];
-		res = recv(dSock, &msgAttente, NMAX, 0);
-		if (res<0){
-			perror("le message pour dire que le deuxieme client s'est connecte n'a pas ete recu");
-			return 1;
-		} else {
-			printf("%s\n", msgAttente);
-		}
-		while(1){
-			
-			//Envoi du message à 2 
-			char mot[NMAX]; 
-			printf("Que voulez vous envoyer ?\n");
-			fgets(mot,NMAX,stdin);
-			*strchr(mot, '\n') = '\0';
-			res = send(dSock,&mot,strlen(mot),0);
-			if (res<0){
-				perror("Message non envoyé");
-				return 1;
-			}
-
-			if(strcmp(mot, "fin") == 0){
-				printf("Communication fermée\n");
-				close(dSock);
-				return 0;
-			}
-
-			//reception du message de 2
-			char msg2[NMAX];
-			res = recv(dSock, &msg2, NMAX, 0);
-			if (res<0){
-				perror ("le message pour dire que le client s'est connecte n'a pas ete recu");
-				return 1;
-			}
-
-			printf("Le client2 dit : %s\n", msg2);
-
-			if(strcmp(msg2, "fin") == 0){
-				printf("Communication fermée\n");
-				close(dSock);
-				return 0;
-			}
-		}
-		close(dSock);
-		
-
-	} else if (numClient == 2){
-		printf("%s\n", "Bonjour client2.");
-		while(1){
-			//Reception du message de 1 
-			char msg1[NMAX]; 
-			res = recv(dSock, &msg1, NMAX, 0);
-
-			if (res<0){
-				perror ("le message pour dire que le client 2 a recu un message du client 1 n'a pas ete recu");
-				return 1;
-			}
-
-			printf("Le client1 dit : %s\n", msg1);
-
-			if(strcmp(msg1, "fin") == 0){
-				printf("Communication fermée\n");
-				close(dSock);
-				return 0;
-			}
-
-			//Envoie du message à 1
-			char mot[NMAX]; 
-			printf("Que voulez vous envoyer ?\n");
-			fgets(mot,NMAX,stdin);
-			*strchr(mot, '\n') = '\0';
-			res = send(dSock,&mot,strlen(mot),0);
-			if (res<0){
-				perror("Message non envoyé");
-				return 1;
-			}
-
-			if(strcmp(mot, "fin") == 0){
-				printf("Communication fermée\n");
-				close(dSock);
-				return 0;
-			}
-		}
-		close(dSock);
-		*/
