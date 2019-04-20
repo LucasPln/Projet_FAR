@@ -10,7 +10,8 @@
 
 
 void *EnvoiMessage(int dSock){
-	char mot[NMAX]; 
+	char mot[NMAX];
+	int res;
 	while(1){
 		printf("Que voulez vous envoyer ?\n");
 		fgets(mot,NMAX,stdin);
@@ -25,12 +26,12 @@ void *EnvoiMessage(int dSock){
 			close(dSock);
 			exit(0);
 		}
-	close(dSock)
 	}
 }
 
 void *RecoitMessage(int dSock){
 	char msg[NMAX];
+	int res;
 	while(1){ 
 		res = recv(dSock, &msg, NMAX, 0);
 		if (res<0){
@@ -43,7 +44,6 @@ void *RecoitMessage(int dSock){
 			close(dSock);
 			exit(0);
 		}
-	close(dSock)
 	}
 }
 
@@ -69,16 +69,38 @@ int main(int argc, char ** argv){
 		return 1;
 	}
 
+	int numClient;
+	res = recv(dSock, &numClient, sizeof(numClient), 0);
+	if (res<0){
+		perror ("Erreur lors de la réception du numéro de client");
+		return 1;
+	}
+
+	if(numClient == 1){
+		printf("%s\n", "Bonjour client1. En attente du deuxième client...");
+		//Attendre 2ème client
+		char msgAttente[NMAX];
+		res = recv(dSock, &msgAttente, NMAX, 0);
+		if (res<0){
+			perror("le message pour dire que le deuxieme client s'est connecte n'a pas ete recu");
+			return 1;
+		} else {
+			printf("%s\n", msgAttente);
+		}
+	}
+
 	
 	pthread_t Envoie;
-		pthread_create(&Envoie, 0, EnvoiMessage, &dSock);
+	pthread_create(&Envoie, 0, EnvoiMessage, dSock);
 
 	pthread_t Recoit;
-		pthread_create(&Recoit, 0, RecoitMessage, &dSock);
+	pthread_create(&Recoit, 0, RecoitMessage, dSock);
 
 	
 	pthread_join(Envoie,0);
 	pthread_join(Recoit,0);
+
+	close(dSock);
 	
 	return 0;
 }
