@@ -52,6 +52,10 @@ void *EnvoiMessage(int dSock){
 			printf("Quel fichier voulez vous envoyer ? \n");
 			fgets(nomFichier, NMAX, stdin);
 			fichier = fopen(nomFichier, "r");
+			if (fichier != NULL){
+				fgets(chaine, NMAX, fichier);
+			}
+			send(dSock, &chaine, strlen(chaine),0);
 
 		}
 	}
