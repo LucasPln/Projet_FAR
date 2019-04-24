@@ -15,15 +15,26 @@ void *EnvoiMessage(int dSock){
 	char nomFichier [NMAX];
 	FILE* fichier; 
 	int res;
+	int tailleMsg;
 	while(1){
 		printf("Que voulez vous envoyer ?\n");
 		fgets(mot,NMAX,stdin);
 		*strchr(mot, '\n') = '\0';
+		tailleMsg = strlen(mot);
+		printf("Socket desc : %d\n",dSock);
+		res = send(dSock,&tailleMsg,sizeof(int),0);
+				
+		if (res<0){
+			perror("Taille du message non envoyé");
+			exit(0);
+		}
+
 		res = send(dSock,&mot,strlen(mot),0);
 		if (res<0){
 			perror("Message non envoyé");
 			exit(0);
 		}
+
 		if(strcmp(mot, "fin") == 0){
 			printf("Communication fermée\n");
 			close(dSock);
@@ -47,14 +58,22 @@ void *EnvoiMessage(int dSock){
 }
 
 void *RecoitMessage(int dSock){
+	int tailleMsg;
 	char msg[NMAX];
 	int res;
-	while(1){ 
+	while(1){
+		do{
+			res = recv(dSock, &tailleMsg, sizeof(int), 0);
+		}while(tailleMsg == 0 || tailleMsg > NMAX);
+		printf("Taille du message :%d\n",tailleMsg);
+
+
 		res = recv(dSock, &msg, NMAX, 0);
 		if (res<0){
 			perror ("le message pour dire que le client n'a pas recu le message de l'autre n'a pas ete recu");
 			exit(0);
 		}
+		msg[tailleMsg]='\0';
 		printf("Le client dit : %s\n", msg);
 		if(strcmp(msg, "fin") == 0){
 			printf("Communication fermée\n");

@@ -19,10 +19,19 @@ struct thread_args{
 };
 
 void *communication(struct thread_args *args){
+	int res;
+	int tailleMsg;
+	char msgClient1[NMAX];
 	while(1){
-		int res;
-		char msgClient1[NMAX];
-		char msgClient2[NMAX];
+		res = recv(args->socketClient1, &tailleMsg, sizeof(int),0);
+
+		if(res < 0){
+			perror("Problème lors de la réception de la taille du message");
+			exit(1);
+		} else if(res == 0){
+			perror("Socket fermé");
+			exit(1);
+		}
 
 		res = recv(args->socketClient1, &msgClient1, NMAX,0);
 
@@ -34,7 +43,20 @@ void *communication(struct thread_args *args){
 			exit(1);
 		}
 
-		printf("Un client dit : %s\n", msgClient1);
+		msgClient1[tailleMsg]='\0';
+
+		printf("Un client dit : %s, de taille : %d\n", msgClient1,tailleMsg);
+
+		res = send(args->socketClient2, &tailleMsg, sizeof(int),0);
+
+		if(res < 0){
+			perror("Problème lors de l'envoie de la taille du message du client1 au client2");
+			exit(1);
+		} else if(res == 0){
+			perror("Socket fermé");
+			exit(1);
+		}
+
 
 		res = send(args->socketClient2, &msgClient1, strlen(msgClient1),0);
 				
