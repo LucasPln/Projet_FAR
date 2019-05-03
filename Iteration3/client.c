@@ -58,29 +58,17 @@ void *EnvoiMessage(int dSock){
 			}
 			printf("Quel fichier voulez vous envoyer ? \n");
 			fgets(nomFichier, NMAX, stdin);
-			printf("on ouvre le fichier\n");
 			FILE* file = NULL;
 			file = fopen("fichier.txt", "r");
-			/*while ((ent = readdir (rep)) != NULL){
-				if (nomFichier != ent){
-					perror ("le fichier n'existe pas");
-				}
-				else {*/
-			printf("le fichier commence à etre copié\n");
-						while (fgets(chaine, NMAX, file) != NULL){
-							printf("le fichier est en train d'etre copié\n");
-							printf("%s\n",chaine);
-							
-						}
-						fclose(file);
-							//strcat(copie, chaine);  //pour pouvoir concaténer toutes les lignes du fichier
-					//}
-				//}
-				res = send(dSock,&chaine,strlen(chaine),0);
-			if(res>=0){
-				perror("le fichier ne s'est pas envoyé");
+			while (fgets(chaine, NMAX, file) != NULL){
+				printf("Données copiées : %s\n",chaine);
+				strcat(copie, chaine);  //pour pouvoir concaténer toutes les lignes du fichier
 			}
-			//}
+			fclose(file);
+			res = send(dSock,&chaine,strlen(chaine),0);
+			if(res>=0){
+				perror("le fichier s'est bien envoyé");
+			}
 		}
 	}
 }
