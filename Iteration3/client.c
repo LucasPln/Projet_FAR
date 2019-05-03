@@ -16,7 +16,6 @@ void *EnvoiMessage(int dSock){
 	FILE* fichier; 
 	int res;
 	int tailleMsg;
-	char chaine [NMAX];
 	while(1){
 		printf("Que voulez vous envoyer ?\n");
 		fgets(mot,NMAX,stdin);
@@ -42,6 +41,8 @@ void *EnvoiMessage(int dSock){
 			exit(0);
 		}
 		if(strcmp(mot, "file") == 0){
+			char chaine [NMAX];
+			char copie [NMAX] = {0};
 			DIR * rep = opendir (".");
 			if (rep != NULL){
 				struct dirent * ent;
@@ -50,19 +51,30 @@ void *EnvoiMessage(int dSock){
 				}
 				closedir (rep);
 			}
+			else {
+				perror ("le dossier est vide ou n'existe pas");
+			}
 			printf("Quel fichier voulez vous envoyer ? \n");
 			fgets(nomFichier, NMAX, stdin);
-			while ((ent = readdir (rep)) != NULL){
-				if (nomFichier != ent){
-					perror ("le fichier n'existe pas")
-				}
-				else {
-					fichier = fopen(nomFichier, "r");
-					if (fichier != NULL){
-						fgets(chaine, NMAX, fichier);
+			if (rep != NULL){
+				struct dirent * ent;
+				while ((ent = readdir (rep)) != NULL){
+					if (nomFichier != ent){
+						perror ("le fichier n'existe pas");
+					}
+					else {
+						fichier = fopen(nomFichier, "r");
+						if (fichier != NULL){
+							while (fgets(chaine, NMAX, fichier) != NULL){
+								strcat(copie, chaine);  //pour pouvoir concaténer toutes les lignes du fichier
+							}
+						send(dSock, &copie, strlen(copie),0);
+						}
+						fclose(fichier);
+					}
 				}
 			}
-			send(dSock, &chaine, strlen(chaine),0);}
+		}
 	}
 }
 
