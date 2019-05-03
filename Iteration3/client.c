@@ -16,6 +16,7 @@ void *EnvoiMessage(int dSock){
 	FILE* fichier; 
 	int res;
 	int tailleMsg;
+	char chaine [NMAX];
 	while(1){
 		printf("Que voulez vous envoyer ?\n");
 		fgets(mot,NMAX,stdin);
@@ -51,13 +52,17 @@ void *EnvoiMessage(int dSock){
 			}
 			printf("Quel fichier voulez vous envoyer ? \n");
 			fgets(nomFichier, NMAX, stdin);
-			fichier = fopen(nomFichier, "r");
-			if (fichier != NULL){
-				fgets(chaine, NMAX, fichier);
+			while ((ent = readdir (rep)) != NULL){
+				if (nomFichier != ent){
+					perror ("le fichier n'existe pas")
+				}
+				else {
+					fichier = fopen(nomFichier, "r");
+					if (fichier != NULL){
+						fgets(chaine, NMAX, fichier);
+				}
 			}
-			send(dSock, &chaine, strlen(chaine),0);
-
-		}
+			send(dSock, &chaine, strlen(chaine),0);}
 	}
 }
 
