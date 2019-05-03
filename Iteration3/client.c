@@ -7,6 +7,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <dirent.h> 
+#include <errno.h>
 #define NMAX 200
 
 
@@ -41,8 +42,9 @@ void *EnvoiMessage(int dSock){
 			exit(0);
 		}
 		if(strcmp(mot, "file") == 0){
-			char chaine [NMAX];
+			char chaine [NMAX]="";
 			char copie [NMAX] = {0};
+			char nomFichier [15];
 			DIR * rep = opendir (".");
 			if (rep != NULL){
 				struct dirent * ent;
@@ -52,28 +54,33 @@ void *EnvoiMessage(int dSock){
 				closedir (rep);
 			}
 			else {
-				perror ("le dossier est vide ou n'existe pas");
+				perror ("le dossier est vide ou n'existe pas\n");
 			}
 			printf("Quel fichier voulez vous envoyer ? \n");
 			fgets(nomFichier, NMAX, stdin);
-			if (rep != NULL){
-				struct dirent * ent;
-				while ((ent = readdir (rep)) != NULL){
-					if (nomFichier != ent){
-						perror ("le fichier n'existe pas");
-					}
-					else {
-						fichier = fopen(nomFichier, "r");
-						if (fichier != NULL){
-							while (fgets(chaine, NMAX, fichier) != NULL){
-								strcat(copie, chaine);  //pour pouvoir concaténer toutes les lignes du fichier
-							}
-						send(dSock, &copie, strlen(copie),0);
-						}
-						fclose(fichier);
-					}
+			printf("on ouvre le fichier\n");
+			FILE* file = NULL;
+			file = fopen("fichier.txt", "r");
+			/*while ((ent = readdir (rep)) != NULL){
+				if (nomFichier != ent){
+					perror ("le fichier n'existe pas");
 				}
+				else {*/
+			printf("le fichier commence à etre copié\n");
+						while (fgets(chaine, NMAX, file) != NULL){
+							printf("le fichier est en train d'etre copié\n");
+							printf("%s\n",chaine);
+							
+						}
+						fclose(file);
+							//strcat(copie, chaine);  //pour pouvoir concaténer toutes les lignes du fichier
+					//}
+				//}
+				res = send(dSock,&chaine,strlen(chaine),0);
+			if(res>=0){
+				perror("le fichier ne s'est pas envoyé");
 			}
+			//}
 		}
 	}
 }
