@@ -66,16 +66,57 @@ void *communication(struct thread_args *args){
 			break;
 		}
 
-		/*if(strcmp(msgClient1, "file")== 0){
-			pthread_t threadFichier;
-			struct thread_args argsFichier;
-			argsEFichier.socketServer = args->socketServer;
-			argsEFichier.socketClient1 = args->socketClient2;
-			argsEFichier.socketClient2 = args->socketClient1;
-			pthread_create(&threadFichier, 0, fichier, &argsFichier);
+		if(strcmp(msgClient1, "file")== 0){
+			int tailleNom;
+			int tailleContenu;
+			char nomFichier[NMAX];
+			char contenuFichier[NMAX];
+			printf("Prêt à recevoir un ficher...\n");
+
+			res = recv(args->socketClient1, &tailleNom, sizeof(int),0); /* Réception de la taille du nom du fichier */
+
+			if(res < 0){
+				perror("Problème lors de la réception de la taille du nom du fichier");
+				exit(1);
+			} else if(res == 0){
+				perror("Socket fermé");
+				exit(1);
+			}
+
+			res = recv(args->socketClient1, &nomFichier, tailleNom,0); /* Réception du nom du fichier */
+
+			if(res < 0){
+				perror("Problème lors de la réception du nom du fichier");
+				exit(1);
+			} else if(res == 0){
+				perror("Socket fermé");
+				exit(1);
+			}
+
+			printf("Nom du fichier : %s\n", nomFichier); /* Affichage du nom du fichier */
+
+			res = send(args->socketClient2, &tailleNom, sizeof(int),0);
+
+			if(res < 0){
+				perror("Problème lors de l'envoie de la taille du nom du fichier au client2");
+				exit(1);
+			} else if(res == 0){
+				perror("Socket fermé");
+				exit(1);
+			}
+
+			res = send(args->socketClient2, &nomFichier, tailleNom,0);
+
+			if(res < 0){
+				perror("Problème lors de l'envoie du nom du fichier au client2");
+				exit(1);
+			} else if(res == 0){
+				perror("Socket fermé");
+				exit(1);
+			}
 
 		}
-		*/
+
 		if(res < 0){
 			perror("Problème lors de l'envoie du message du client1 au client2");
 			exit(1);

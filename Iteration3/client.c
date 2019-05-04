@@ -30,7 +30,7 @@ void *EnvoiMessage(int dSock){
 			exit(0);
 		}
 
-		res = send(dSock,&mot,strlen(mot),0);
+		res = send(dSock,&mot,tailleMsg,0);
 		if (res<0){
 			perror("Message non envoyé");
 			exit(0);
@@ -46,6 +46,8 @@ void *EnvoiMessage(int dSock){
 			char chaine [NMAX]="";
 			char copie [NMAX] = {0};
 			char nomFichier [15];
+			int tailleNom;
+
 			DIR * rep = opendir (".");
 			if (rep != NULL){
 				struct dirent * ent;
@@ -60,19 +62,37 @@ void *EnvoiMessage(int dSock){
 			printf("Quel fichier voulez vous envoyer ? \n");
 			fgets(nomFichier, NMAX, stdin);
 			*strchr(nomFichier, '\n') = '\0';
+
+			tailleNom = strlen(nomFichier);
+			res = send(dSock,&tailleNom,sizeof(int),0); /* Envoie de la taille du nom du fichier */
+
+			if (res<0){
+				perror("Taille du nom du fichier non envoyé");
+				exit(0);
+			}
+
+			res = send(dSock,&nomFichier,tailleNom,0); /* Envoie du nom du fichier */
+
+			if (res<0){
+				perror("Nom du fichier non envoyé");
+				exit(0);
+			}
+
 			FILE* file = NULL;
 			file = fopen(nomFichier, "r");
 
 			while (fgets(chaine, NMAX, file) != NULL){
 				printf("Données copiées : %s\n",chaine);
-				strcat(copie, chaine);  //pour pouvoir concaténer toutes les lignes du fichier
+				strcat(copie, chaine);  /* pour pouvoir concaténer toutes les lignes du fichier */
 			}
 
 			fclose(file);
+			/*
 			res = send(dSock,&chaine,strlen(chaine),0);
 			if(res>=0){
 				perror("le fichier s'est bien envoyé");
 			}
+			*/
 		}
 	}
 }
@@ -100,6 +120,38 @@ void *RecoitMessage(int dSock){
 			printf("Communication fermée\n");
 			close(dSock);
 			exit(0);
+		}
+
+		if(strcmp(msg, "file") == 0){
+			int tailleNom;
+			int tailleContenu;
+			char nomFichier[NMAX];
+			char contenuFichier[NMAX];
+			printf("Prêt à recevoir un ficher...\n");
+
+			res = recv(dSock, &tailleNom, sizeof(int),0); /* Réception de la taille du nom du fichier */
+
+			if(res < 0){
+				perror("Problème lors de la réception de la taille du nom du fichier");
+				exit(1);
+			} else if(res == 0){
+				perror("Socket fermé");
+				exit(1);
+			}
+
+			res = recv(dSock, &nomFichier, tailleNom,0); /* Réception du nom du fichier */
+
+			if(res < 0){
+				perror("Problème lors de la réception du nom du fichier");
+				exit(1);
+			} else if(res == 0){
+				perror("Socket fermé");
+				exit(1);
+			}
+
+			printf("Nom du fichier : %s\n", nomFichier); /* Affichage du nom du fichier */
+
+
 		}
 	}
 }
