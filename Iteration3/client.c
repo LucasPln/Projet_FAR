@@ -41,6 +41,7 @@ void *EnvoiMessage(int dSock){
 			close(dSock);
 			exit(0);
 		}
+
 		if(strcmp(mot, "file") == 0){
 			char chaine [NMAX]="";
 			char copie [NMAX] = {0};
@@ -52,18 +53,21 @@ void *EnvoiMessage(int dSock){
 					printf ("%s\n", ent->d_name);
 				}
 				closedir (rep);
-			}
-			else {
+			} else {
 				perror ("le dossier est vide ou n'existe pas\n");
 			}
+
 			printf("Quel fichier voulez vous envoyer ? \n");
 			fgets(nomFichier, NMAX, stdin);
+			*strchr(nomFichier, '\n') = '\0';
 			FILE* file = NULL;
-			file = fopen("fichier.txt", "r");
+			file = fopen(nomFichier, "r");
+
 			while (fgets(chaine, NMAX, file) != NULL){
 				printf("Données copiées : %s\n",chaine);
 				strcat(copie, chaine);  //pour pouvoir concaténer toutes les lignes du fichier
 			}
+
 			fclose(file);
 			res = send(dSock,&chaine,strlen(chaine),0);
 			if(res>=0){
@@ -78,9 +82,9 @@ void *RecoitMessage(int dSock){
 	char msg[NMAX];
 	int res;
 	while(1){
-		do{
+		do {
 			res = recv(dSock, &tailleMsg, sizeof(int), 0);
-		}while(tailleMsg == 0 || tailleMsg > NMAX);
+		} while(tailleMsg == 0 || tailleMsg > NMAX);
 		printf("Taille du message :%d\n",tailleMsg);
 
 
@@ -89,6 +93,7 @@ void *RecoitMessage(int dSock){
 			perror ("le message pour dire que le client n'a pas recu le message de l'autre n'a pas ete recu");
 			exit(0);
 		}
+
 		msg[tailleMsg]='\0';
 		printf("Le client dit : %s\n", msg);
 		if(strcmp(msg, "fin") == 0){
