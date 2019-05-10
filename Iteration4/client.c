@@ -240,6 +240,52 @@ int main(int argc, char ** argv){
 		return 1;
 	}
 
+	/*
+	recoit la liste des threads dispo
+	et choisit quel chaine il veut utiliser
+	*/
+	int tailleSalon; 
+	char salon [NMAX];
+	int choixClient;
+
+	res = recv(dSock, &tailleSalon, sizeof(int), 0);v /*recoit la taille de la chaine de caractère de tous les salons dispo*/
+	
+	if(res<0){
+		perror ("le client n'a pas reçu la taille de la chaine de caractère annonçant les salons disponibles.");
+		return 1;
+	}
+	else if (res == 0){
+		perror("Socket fermé :");
+		return 0;
+	}
+	
+	res = recv(dSock, &salon, tailleSalon, 0); /*recoit la chaine de caractère des salons dispo*/
+
+	if (res<0){
+		perror("le client n'a pas reçu les chaines disponibles");
+		return 1;
+	}
+	else if (res==0){
+		perror ("Socket fermé :");
+		return 0;
+	}
+	printf("Voici tous les salons disponibles : %s \n", salon);
+	printf("Quel salon voulez vous choisir ?\n");
+	fgets(choixClient, sizeof(int) ,stdin)
+	
+	res = send(dSock, &choixClient, sizeof(int), 0); /*envoie dans quelle salon il veut se connecter*/
+
+	if (res<0){
+		perror("le choix du salon n'a pas été envoyé au serveur");
+		return 1;
+	}
+
+	else if (res==0){
+		perror("Socket fermé :");
+		return 0;
+	}
+
+
 	int numClient;
 	res = recv(dSock, &numClient, sizeof(numClient), 0);
 	if (res<0){
