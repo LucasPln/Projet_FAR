@@ -246,9 +246,9 @@ int main(int argc, char ** argv){
 	*/
 	int tailleSalon; 
 	char salon [NMAX];
-	int choixClient;
+	char choixClient[2] = {0};
 
-	res = recv(dSock, &tailleSalon, sizeof(int), 0);v /*recoit la taille de la chaine de caractère de tous les salons dispo*/
+	res = recv(dSock, &tailleSalon, sizeof(int), 0); /*recoit la taille de la chaine de caractère de tous les salons dispo*/
 	
 	if(res<0){
 		perror ("le client n'a pas reçu la taille de la chaine de caractère annonçant les salons disponibles.");
@@ -269,9 +269,11 @@ int main(int argc, char ** argv){
 		perror ("Socket fermé :");
 		return 0;
 	}
-	printf("Voici tous les salons disponibles : %s \n", salon);
+	salon[tailleSalon] = '\0';
+
+	printf("Voici tous les salons disponibles :\n %s \n", salon);
 	printf("Quel salon voulez vous choisir ?\n");
-	fgets(choixClient, sizeof(int) ,stdin)
+	fgets(choixClient, sizeof(int) ,stdin);
 	
 	res = send(dSock, &choixClient, sizeof(int), 0); /*envoie dans quelle salon il veut se connecter*/
 
